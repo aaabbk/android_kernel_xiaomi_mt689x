@@ -1,0 +1,246 @@
+name: Auto Kernel Builer
+on:
+   push:
+      branches: [main,ksunext,ksunext-susfs]
+   workflow_dispatch:
+      inputs:
+         ksuversion:
+            description: "请输入 KernelSU Next 的版本号"
+            required: true
+            default: "3.0.0"
+         susfsversion:
+            description: "请输入 SUSFS 的版本号"
+            required: true
+            default: "2.0.0"
+         kernelversion:
+            description: "请输入内核版本号"
+            required: true
+            default: "4.14.336"
+         version:
+            description: "请输入版本号"
+            required: true
+            default: "vX.X.X"
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix: 
+        branch: ['A15']
+      fail-fast: false
+    timeout-minutes: 45
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 20G
+      ARCH: arm64
+      SUBARCH: arm
+      KSU_VER: ${{ github.event.inputs.ksuversion || '3.0.0' }}
+      SUSFS_VER: ${{ github.event.inputs.susfsversion || '2.0.0' }}
+      KER_VER: ${{ github.event.inputs.kernelversion || '4.14.336' }}
+
+    steps:
+    - name: Checkout ${{ matrix.branch }} branch Code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ matrix.branch }}
+
+    - name: Generate Dynamic Version
+      run: |
+        if [ -n "${{ github.event.inputs.version }}" ]; then
+          echo "REL_VER=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+        else
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          DATE_STR=$(date +'%y%m%d')
+          echo "REL_VER=v${DATE_STR}-${SHORT_SHA}" >> $GITHUB_ENV
+        fi
+
+    - name: Install Dependencies & toolchain
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          build-essential \
+          clang-13 \
+          lld-13 \
+          libssl-dev \
+          libelf-dev \
+          flex \
+          bison \
+          bc \
+          ccache \
+          curl \
+          git \
+          git-lfs \
+          gnupg \
+          gperf \
+          imagemagick \
+          liblz4-tool \
+          libncurses6 \
+          libncurses5-dev \
+          libsdl1.2-dev \
+          libxml2 \
+          libxml2-utils \
+          lzop \
+          pngcrush \
+          rsync \
+          schedtool \
+          squashfs-tools \
+          xsltproc \
+          zip \
+          zlib1g-dev \
+          llvm-13 \
+          llvm-13-tools
+    
+        curl -Lo gcc-64.tar.xz "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
+        mkdir -p $HOME/gcc-64
+        tar -xJf gcc-64.tar.xz -C $HOME/gcc-64 --strip-components=1
+        
+        curl -Lo gcc-32.tar.xz "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz"
+        mkdir -p $HOME/gcc-32
+        tar -xJf gcc-32.tar.xz -C $HOME/gcc-32 --strip-components=1
+        
+        echo "$HOME/gcc-64/bin" >> $GITHUB_PATH
+        echo "$HOME/gcc-32/bin" >> $GITHUB_PATH
+
+        sudo update-alternatives --install /usr/bin/llvm-ar llvm-ar /usr/bin/llvm-ar-13 100
+        sudo update-alternatives --install /usr/bin/llvm-nm llvm-nm /usr/bin/llvm-nm-13 100
+        sudo update-alternatives --install /usr/bin/llvm-objcopy llvm-objcopy /usr/bin/llvm-objcopy-13 100
+        sudo update-alternatives --install /usr/bin/llvm-objdump llvm-objdump /usr/bin/llvm-objdump-13 100
+        sudo update-alternatives --install /usr/bin/llvm-readelf llvm-readelf /usr/bin/llvm-readelf-13 100
+        sudo update-alternatives --install /usr/bin/llvm-strip llvm-strip /usr/bin/llvm-strip-13 100
+
+    - name: Set swap to 10G
+      uses: pierotofy/set-swap-space@master
+      with:
+        swap-size-gb: 10
+
+    - name: Configure ccache
+      run: |
+        mkdir -p $CCACHE_DIR
+        echo "max_size = $CCACHE_MAXSIZE"
+        sudo chmod -R 777 $CCACHE_DIR
+
+    - name: Restore ccache
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.CCACHE_DIR }}
+        key: kernel-ccache-${{ runner.os }}-${{ env.ARCH }}-${{ matrix.branch }}
+    
+    - name: Submodule init (only for ksunext and ksunext-susfs)
+      run: |
+        if [ ${{ matrix.branch }} == ksunext ] || [ ${{ matrix.branch }} == ksunext-susfs ]; then
+          git submodule update --init
+        fi
+    
+    - name: Check GCC 13 Toolchains
+      run: |
+        # 验证一下核心工具
+        aarch64-none-linux-gnu-gcc --version
+        arm-none-linux-gnueabihf-gcc --version
+
+    - name: Build Kernel (ARM64 Cross-Compile)
+      run: |
+        export PATH="$PATH:$HOME/gcc-64/bin:$HOME/gcc-32/bin"
+
+        make -j32 O=out \
+          CC="ccache clang-13" \
+          LD=ld.lld-13 \
+          CLANG_TRIPLE=aarch64-none-linux-gnu- \
+          CROSS_COMPILE=aarch64-none-linux-gnu- \
+          CROSS_COMPILE_COMPAT=arm-none-linux-gnueabihf- \
+          CROSS_COMPILE_ARM32=arm-none-linux-gnueabihf- \
+          LLVM_IAS=1 \
+          KCFLAGS="--target=aarch64-linux-gnu \
+                   -Wno-unused-but-set-variable \
+                   -Wno-unused-variable \
+                   -Wno-unused-function \
+                   -Wno-unused-label" \
+          vendor/bomb_user_defconfig
+
+        if [ ${{ matrix.branch }} == ksunext-susfs ]; then
+          VERSION="${{ env.REL_VER }}-ksunext-${{ env.KSU_VER }}-susfs-${{ env.SUSFS_VER }}"
+        elif [ ${{ matrix.branch }} == ksunext ]; then
+          VERSION="${{ env.REL_VER }}-ksunext-${{ env.KSU_VER }}"
+        else
+          VERSION="${{ env.REL_VER }}"
+        fi
+
+        echo "-${VERSION}" > .scmversion
+
+        make -j32 O=out \
+          CC="ccache clang-13" \
+          LD=ld.lld-13 \
+          CLANG_TRIPLE=aarch64-none-linux-gnu- \
+          CROSS_COMPILE=aarch64-none-linux-gnu- \
+          CROSS_COMPILE_COMPAT=arm-none-linux-gnueabihf- \
+          CROSS_COMPILE_ARM32=arm-none-linux-gnueabihf- \
+          LLVM_IAS=1 \
+          KCFLAGS="--target=aarch64-linux-gnu \
+                   -Wno-unused-but-set-variable \
+                   -Wno-unused-variable \
+                   -Wno-unused-function \
+                   -Wno-unused-label"
+
+    - name: Package Kernel
+      run: |
+        git clone --depth=1 https://github.com/osm0sis/AnyKernel3.git AnyKernel3
+        cp out/arch/arm64/boot/Image AnyKernel3/
+        cd AnyKernel3
+
+        sed -i 's/device\.name1=.*/device.name1=cannon/' anykernel.sh
+        sed -i 's/device\.name2=.*/device.name2=cannong/' anykernel.sh
+        sed -i '/device\.name[3-5]=.*/d' anykernel.sh
+        if [ ${{ matrix.branch }} == ksunext ]; then
+          sed -i 's/kernel\.string=.*/kernel.string=Linux Kernel ${{ env.KER_VER }} (${{ env.REL_VER }}) patched KernelSU Next ${{ env.KSU_VER }} by 酷安@孤独不能/' anykernel.sh
+        elif [ ${{ matrix.branch }} == ksunext-susfs ]; then
+          sed -i 's/kernel\.string=.*/kernel.string=Linux Kernel ${{ env.KER_VER }} (${{ env.REL_VER }}) patched KernelSU Next ${{ env.KSU_VER }} and SUSFS ${{ env.SUSFS_VER }} by 酷安@孤独不能/' anykernel.sh
+        else
+          sed -i 's/kernel\.string=.*/kernel.string=Linux Kernel ${{ env.KER_VER }} (${{ env.REL_VER }}) by 酷安@孤独不能/' anykernel.sh
+        fi
+        sed -i 's/BLOCK=.*/BLOCK=boot/' anykernel.sh
+        sed -i 's/IS_SLOT_DEVICE=.*/IS_SLOT_DEVICE=auto/' anykernel.sh
+        
+        if [ ${{ matrix.branch }} == ksunext ]; then
+          zip -r ../AnyKernel3-cannon-${{ env.REL_VER }}-ksunext-${{ env.KSU_VER }}.zip *
+        elif [ ${{ matrix.branch }} == ksunext-susfs ]; then
+          zip -r ../AnyKernel3-cannon-${{ env.REL_VER }}-ksunext-${{ env.KSU_VER }}-susfs-${{ env.SUSFS_VER }}.zip *
+        elif [ ${{ matrix.branch }} == main ]; then
+          zip -r ../AnyKernel3-cannon-${{ env.REL_VER }}-main.zip *
+        fi
+        cd ..
+
+    - name: Set Artifact File
+      run: |
+        FILE=$(ls AnyKernel3-cannon-*.zip | head -n 1)
+        echo "Found artifact: $FILE"
+        echo "ARTIFACT_FILE=$FILE" >> $GITHUB_ENV
+        FILENAME=$(basename "$FILE" .zip)
+        echo "ARTIFACT_NAME=$FILENAME" >> $GITHUB_ENV
+
+    - name: Upload AnyKernel3.zip
+      uses: actions/upload-artifact@v4
+      with:
+        path: ${{ env.ARTIFACT_FILE }}
+        name: ${{ env.ARTIFACT_NAME }}
+
+    - name: Install GitHub CLI
+      if: always()
+      run: sudo apt install -y gh
+
+    - name: Delete old cache before saving new
+      if: always()
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "Deleting old cache (if exists)..."
+        cache_id=$(gh cache list | grep -P "\bkernel-ccache-${{ runner.os }}-${{ env.ARCH }}-${{ matrix.branch }}\b(?!-)" | awk '{print $1}')
+        if [ -n "$cache_id" ]; then
+          gh cache delete "$cache_id" || true
+        fi
+
+    - name: Save ccache
+      if: always()
+      uses: actions/cache/save@v3
+      with:
+        path: ${{ env.CCACHE_DIR }}
+        key: kernel-ccache-${{ runner.os }}-${{ env.ARCH }}-${{ matrix.branch }}
+    
