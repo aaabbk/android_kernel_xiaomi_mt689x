@@ -42,8 +42,6 @@
 #include "../../codecs/cs35l41/cs35l41_ext.h"
 #define CS35L41_SPEAKER_NAME "speaker_amp.6-0040"
 #define CS35L41_RECEIVER_NAME "speaker_amp.6-0042"
-static int mtk_spk_type = MTK_SPK_NOT_SMARTPA;
-
 static struct snd_soc_dai_link_component cs35l41_dai_link_component[] =
 {
 	{
