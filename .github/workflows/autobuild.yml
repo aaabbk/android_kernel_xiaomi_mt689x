@@ -154,7 +154,7 @@ jobs:
                    -Wno-unused-variable \
                    -Wno-unused-function \
                    -Wno-unused-label" \
-          vendor/bomb_user_defconfig
+          atom_user_defconfig
 
         if [ ${{ matrix.branch }} == ksunext-susfs ]; then
           VERSION="${{ env.REL_VER }}-ksunext-${{ env.KSU_VER }}-susfs-${{ env.SUSFS_VER }}"
