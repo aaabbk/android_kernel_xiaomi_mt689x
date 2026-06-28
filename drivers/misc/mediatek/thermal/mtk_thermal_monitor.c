@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -1904,7 +1905,7 @@ static struct thermal_cooling_device_ops mtk_cooling_wrapper_dev_ops = {
 	.get_max_state = mtk_cooling_wrapper_get_max_state,
 	.get_cur_state = mtk_cooling_wrapper_get_cur_state,
 	.set_cur_state = mtk_cooling_wrapper_set_cur_state,
-		.get_available = mtk_cooling_wrapper_get_available,
+	.get_available = mtk_cooling_wrapper_get_available,
 };
 
 /*

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -54,9 +55,8 @@ static int mtk_cl_md_set_cur_state
 {
 	unsigned int cmd = MUTT_TMC_COOLER_LV_DISABLE;
 	int ret = -1;
-
+	mtk_cooler_md_dprintk("%s remapping set lv%ld\n", __func__, state);
 	state = state - 1;
-
 	if (state == g_md_level)
 		goto end;
 
@@ -137,4 +137,3 @@ static void __exit mtk_cooler_md_exit(void)
 }
 module_init(mtk_cooler_md_init);
 module_exit(mtk_cooler_md_exit);
-

@@ -64,8 +64,7 @@
 
 #define CLATM_USE_MIN_CPU_OPP			(1)
 
-
-#define CLCTM_TARGET_TJ				(85000)
+#define CLCTM_TARGET_TJ				(90000)
 #define CLCTM_TPCB_1				(47000)
 #define CLCTM_TPCB_2				(51000)
 #define CLCTM_EXIT_TJ				(CLCTM_TARGET_TJ - 10000)

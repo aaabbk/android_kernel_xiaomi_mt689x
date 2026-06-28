@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -53,7 +54,7 @@ static unsigned int g_char_curr_level;
 static unsigned int g_thm_en_charging;
 static unsigned int max_char_curr_index;
 
-/* char_curr_t = charging current table 
+/* char_curr_t = charging current table
 *  -1	: unlimit charging current
 *  0	: stop charging
 *  positive integer: charging current limit (unit: mA)
@@ -118,7 +119,7 @@ static int mtk_cl_char_curr_set_cur_state
 		mtk_cooler_char_curr_dprintk("%s: wrong state=%ld %d\n",
 			__func__, state, max_char_curr_index);
 	} else {
-		g_char_curr_level = state; 
+		g_char_curr_level = state;
 
 		if (g_char_curr_level == 0) {
 			chr_input_curr_limit = -1;/* unlimit input current*/
@@ -282,5 +283,4 @@ module_exit(mtk_cooler_char_curr_exit);
 #if (CONFIG_MTK_GAUGE_VERSION == 30)
 late_initcall(mtkcooler_char_curr_late_init);
 #endif
-
 

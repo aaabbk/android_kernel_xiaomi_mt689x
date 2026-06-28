@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -27,7 +28,6 @@
 #include <mtk_cooler_setting.h>
 #include <linux/debugfs.h>
 #include <mtk_cooler_mutt_gen97.h>
-
 
 /****************************************************************************
  *  Macro Definitions
@@ -57,7 +57,6 @@
 #endif
 
 /* State of "MD off & noIMS" are not included. */
-
 #define MAX_NUM_TX_PWR_LV  3
 
 #define MTK_CL_MUTT_GET_LIMIT(limit, state) \
@@ -86,7 +85,7 @@ do { \
 
 /* LOG */
 #define mtk_cooler_mutt_dprintk_always(fmt, args...) \
-pr_notice("[Thermal/TC/mutt]" fmt, ##args)
+pr_debug("[Thermal/TC/mutt]" fmt, ##args)
 
 #define mtk_cooler_mutt_dprintk(fmt, args...) \
 do { \
@@ -113,7 +112,6 @@ static const struct file_operations clmutt_ ## name ## _proc_fops = {         \
 	.write	= clmutt_ ## name ## _proc_write,                             \
 }
 
-
 #if FEATURE_THERMAL_DIAG
 /*
  * use "si_code" for Action identify
@@ -137,7 +135,6 @@ enum {
 	 */
 	TM_CLIENT_clmutt = 3
 };
-
 
 /****************************************************************************
  *  Type Definitions
@@ -350,7 +347,7 @@ unsigned int clmutt_level_selection(int lv, unsigned int type)
 		? ctrl_lv | TMC_COOLER_LV_RAT_NR
 		: ctrl_lv | TMC_COOLER_LV_RAT_LTE;
 
-	mtk_cooler_mutt_dprintk_always(
+	mtk_cooler_mutt_dprintk(
 		"[%s] type(%d) lv(%d):ctrl_lv: 0x%08x\n",
 		__func__, type, lv, ctrl_lv);
 

@@ -5,12 +5,6 @@
 
 ifeq ($(CONFIG_MACH_MT6833),y)
 	PDIR = mt6833
-else ifeq ($(CONFIG_MACH_MT6893),y)
-	PDIR = mt6893
-else ifeq ($(CONFIG_MACH_MT6877),y)
-	PDIR = mt6877
-else ifeq ($(CONFIG_MACH_MT6781),y)
-	PDIR = mt6781
 else
 	PDIR = $(MTK_PLATFORM)
 endif
@@ -31,16 +25,8 @@ ccflags-y  += -I$(srctree)/drivers/misc/mediatek/imgsensor/inc/
 ifeq ($(CONFIG_MTK_TINYSYS_SSPM_SUPPORT),y)
 ccflags-y  += -I$(srctree)/drivers/misc/mediatek/sspm
 ccflags-y  += -I$(srctree)/drivers/misc/mediatek/sspm/v1
-ifeq ($(CONFIG_MACH_MT6781),y)
 ccflags-y  += -I$(srctree)/drivers/misc/mediatek/sspm/$(PDIR)
-else
-ccflags-y  += -I$(srctree)/drivers/misc/mediatek/sspm/$(MTK_PLATFORM)
-endif
-ifeq ($(CONFIG_MACH_MT6877),y)
-ccflags-y  += -I$(srctree)/drivers/misc/mediatek/mcupm/$(MTK_PLATFORM)
-else
 ccflags-y  += -I$(srctree)/drivers/misc/mediatek/mcupm/$(PDIR)
-endif
 endif
 
 ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6735"))
@@ -64,6 +50,7 @@ endif
 obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 #obj-$(CONFIG_THERMAL) += mtk_ts_buck.o
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
@@ -85,6 +72,7 @@ ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6580"))
 obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 #obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 #obj-$(CONFIG_THERMAL) += mtk_ts_buck.o
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
@@ -104,6 +92,7 @@ endif
 obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 #obj-$(CONFIG_THERMAL) += mtk_ts_buck.o
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
@@ -126,6 +115,7 @@ ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6797"))
 obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 #obj-$(CONFIG_THERMAL) += mtk_ts_buck.o
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
@@ -150,6 +140,7 @@ endif
 obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 #obj-$(CONFIG_THERMAL) += mtk_ts_buck.o
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
@@ -176,6 +167,7 @@ ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "elbrus"))
 #obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 #obj-$(CONFIG_THERMAL) += mtk_ts_buck.o
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu.o
 #obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
@@ -196,6 +188,7 @@ ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6799"))
 obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 #obj-$(CONFIG_THERMAL) += mtk_ts_buck.o
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu_noBank.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
@@ -225,6 +218,7 @@ ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6759"))
 obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 #obj-$(CONFIG_THERMAL) += mtk_ts_buck.o
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu_noBank.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
@@ -256,6 +250,7 @@ obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 ifneq ($(CONFIG_POWER_EXT),y)
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 endif
 
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu_noBank.o
@@ -283,6 +278,7 @@ ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6758"))
 obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu_noBank.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa_thput.o
@@ -312,6 +308,7 @@ ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6765"))
 obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu_noBank.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa_thput.o
@@ -347,6 +344,7 @@ obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu_noBank.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
@@ -378,6 +376,7 @@ obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu_noBank.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
@@ -406,6 +405,7 @@ obj-$(CONFIG_THERMAL) += mtk_ts_battery.o
 
 obj-$(CONFIG_THERMAL) += mtk_ts_bts.o
 obj-$(CONFIG_THERMAL) += mtk_ts_btsmdpa.o
+obj-$(CONFIG_THERMAL) += mtk_ts_backlight.o
 
 obj-$(CONFIG_THERMAL) += mtk_ts_cpu_noBank.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
@@ -416,11 +416,7 @@ obj-$(CONFIG_THERMAL) += mtk_ts_charger.o
 
 
 ifneq ($(CONFIG_MTK_COMBO_WIFI),)
-ifneq ($(filter "MT76%", $(CONFIG_MTK_COMBO_CHIP)),)
-    obj-$(CONFIG_THERMAL) += mtk_ts_wmt_766x.o
-else
     obj-$(CONFIG_THERMAL) += mtk_ts_wmt.o
-endif
 endif
 
 obj-$(CONFIG_THERMAL) += mtk_tsAll.o
@@ -440,10 +436,6 @@ obj-$(CONFIG_THERMAL) += mtk_ts_pa.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pa_thput.o
 obj-$(CONFIG_THERMAL) += mtk_ts_pmic.o
 obj-$(CONFIG_THERMAL) += mtk_ts_charger.o
-obj-$(CONFIG_THERMAL) += mtk_ts_quiet.o
-obj-$(CONFIG_THERMAL) += mtk_ts_lcd_ntc.o
-obj-$(CONFIG_THERMAL) += mtk_ts_ntc.o
-#obj-$(CONFIG_THERMAL) += mtk_ts_charger2.o
 
 
 ifneq ($(CONFIG_MTK_COMBO_WIFI),)
@@ -491,11 +483,6 @@ obj-$(CONFIG_THERMAL) += mtk_ts_pmic.o
 obj-$(CONFIG_THERMAL) += mtk_ts_charger.o
 #obj-$(CONFIG_THERMAL) += mtk_ts_charger2.o
 
-#obj-$(CONFIG_THERMAL) += mtk_ts_lcd_ntc.o
-obj-$(CONFIG_THERMAL) += mtk_ts_quiet.o
-obj-$(CONFIG_THERMAL) += mtk_ts_ntc.o
-obj-$(CONFIG_THERMAL) += mtk_ts_flash.o
-obj-$(CONFIG_THERMAL) += mtk_ts_wifi.o
 
 ifneq ($(CONFIG_MTK_COMBO_WIFI),)
     obj-$(CONFIG_THERMAL) += mtk_ts_wmt.o

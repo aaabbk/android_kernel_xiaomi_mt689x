@@ -122,15 +122,11 @@
 #define CLEAR_TEMP 26111
 
 /* Thermal VPU throttling support */
-#ifdef CONFIG_MTK_APUSYS_VPU
+#ifdef CONFIG_MTK_VPU_SUPPORT
 #define THERMAL_VPU_SUPPORT
 #endif
-
 /* Thermal MDLA throttling support */
-#ifdef CONFIG_MTK_APUSYS_MDLA_SUPPORT
-#define THERMAL_MDLA_SUPPORT
-#endif
-
+/* #define THERMAL_MDLA_SUPPORT */
 /* EARA_Thermal power budget allocation support */
 #define EARA_THERMAL_SUPPORT
 
@@ -149,14 +145,11 @@
 
 #if CFG_THERM_LVTS
 #define CONFIG_LVTS_ERROR_AEE_WARNING (0)
-//#define CONFIG_LVTS_DYNAMIC_ENABLE_REBOOT (0)
-#define DYNAMIC_REBOOT_TRIP_TEMP (35000)
-#define DYNAMIC_REBOOT_EXIT_TEMP (30000)
 #else
 #define CONFIG_LVTS_ERROR_AEE_WARNING (0)
 #endif
 
-#define DUMP_LVTS_REGISTER_FOR_ZERO_RAW_ISSUE  (1)
+#define DUMP_LVTS_REGISTER_FOR_ZERO_RAW_ISSUE  (0)
 
 #if CONFIG_LVTS_ERROR_AEE_WARNING
 #define LVTS_FORCE_ERROR_TRIGGER (0)
@@ -172,7 +165,7 @@
 #endif
 #define LVTS_VALID_DATA_TIME_PROFILING (0)
 
-#define LVTS_USE_DOMINATOR_SENSING_POINT (1)
+#define LVTS_USE_DOMINATOR_SENSING_POINT (0)
 
 #define CFG_THERMAL_KERNEL_IGNORE_HOT_SENSOR (0)
 /*=============================================================
@@ -240,77 +233,10 @@ struct mtk_cpu_power_info {
 };
 
 /*=============================================================
- * LVTS Structure and Enum
- *=============================================================
- */
-#if CFG_THERM_LVTS
-
-/*
- * module			LVTS Plan
- *=====================================================
- * MCU_LITTLE	LVTS1-0, LVTS1-1, LVTS1-2, LVTS1-3
- * MCU_BIG		LVTS2-0, LVTS2-1
- * GPU			LVTS3-0
- * CAM			LVTS3-1
- * SOC TOP		LVTS3-2, LVTS3-3
- * VPU			LVTS4-0
- * MD-4G		LVTS5-0
- * MD-5G		LVTS5-1
- * MD-3G		LVTS5-2
- */
-
-
-/* private thermal sensor enum */
-enum lvts_sensor_enum {
-	L_TS_LVTS1_0 = 0,	/* LVTS1-0 Little */
-	L_TS_LVTS1_1,		/* LVTS1-1 Little */
-	L_TS_LVTS1_2,		/* LVTS1-2 Little */
-	L_TS_LVTS1_3,		/* LVTS1-3 Little */
-	L_TS_LVTS2_0,		/* LVTS2-0 Big */
-	L_TS_LVTS2_1,		/* LVTS2-1 Big */
-	L_TS_LVTS3_0,		/* LVTS3-0 GPU */
-	L_TS_LVTS3_1,		/* LVTS3-1 CAM */
-	L_TS_LVTS3_2,		/* LVTS3-2 VP */
-	L_TS_LVTS3_3,		/* LVTS3-3 VP */
-	L_TS_LVTS4_0,		/* LVTS4-0 VPU */
-	L_TS_LVTS5_0,		/* LVTS5-0 MD-4G */
-	L_TS_LVTS5_1,		/* LVTS5-1 MD-5G */
-	L_TS_LVTS5_2,		/* LVTS5-2 MD-3G */
-	L_TS_LVTS_NUM
-};
-
-
-enum lvts_tc_enum {
-	LVTS_MCU_CONTROLLER0 = 0,/* LVTSMONCTL0 */
-	LVTS_MCU_CONTROLLER1,	/* LVTSMONCTL0_1 */
-	LVTS_AP_CONTROLLER0,	/* LVTSMONCTL0 */
-	LVTS_AP_CONTROLLER1,	/* LVTSMONCTL0_1 */
-	LVTS_AP_CONTROLLER2,	/* LVTSMONCTL0_2 */
-	LVTS_CONTROLLER_NUM
-};
-
-
-struct lvts_thermal_controller_speed {
-	unsigned int group_interval_delay;
-	unsigned int period_unit;
-	unsigned int filter_interval_delay;
-	unsigned int sensor_interval_delay;
-};
-
-struct lvts_thermal_controller {
-	enum lvts_sensor_enum ts[4]; /* sensor point 0 ~ 3 */
-	int ts_number;
-	int dominator_ts_idx; /* hw protection ref TS (index of the ts array) */
-	int tc_offset;
-	struct lvts_thermal_controller_speed tc_speed;
-};
-#endif
-
-/*=============================================================
  * Tsense Structure and Enum
  *=============================================================
  */
-#if !defined(CFG_THERM_NO_AUXADC)
+
 /* private thermal sensor enum */
 enum tsmcu_sensor_enum {
 	L_TS_MCU0 = 0,
@@ -333,29 +259,66 @@ enum thermal_controller_name {
 	THERMAL_CONTROLLER2,		/* TEMPMONCTL0_2 */
 	THERMAL_CONTROLLER_NUM
 };
-#endif
+
 struct thermal_controller_speed {
 	unsigned int period_unit;
 	unsigned int filter_interval_delay;
 	unsigned int sensor_interval_delay;
 	unsigned int ahb_polling_interval;
 };
-#if CFG_THERM_LVTS
-struct thermal_controller {
-	enum lvts_sensor_enum ts[4]; /* Sensor point 0 ~ 3 */
-	int ts_number;
-	int dominator_ts_idx; //hw protection ref TS (index of the ts array)
-	int tc_offset;
-	struct thermal_controller_speed tc_speed;
-};
 
-#else
 struct thermal_controller {
 	enum tsmcu_sensor_enum ts[4]; /* Sensor point 0 ~ 3 */
 	int ts_number;
 	int dominator_ts_idx; //hw protection ref TS (index of the ts array)
 	int tc_offset;
 	struct thermal_controller_speed tc_speed;
+};
+
+/*=============================================================
+ * LVTS Structure and Enum
+ *=============================================================
+ */
+#if CFG_THERM_LVTS
+/* private thermal sensor enum */
+enum lvts_sensor_enum {
+	L_TS_LVTS1_0 = 0,
+	L_TS_LVTS1_1,
+	L_TS_LVTS2_0,
+	L_TS_LVTS2_1,
+	L_TS_LVTS2_2,
+	L_TS_LVTS3_0,
+	L_TS_LVTS3_1,
+	L_TS_LVTS4_0,
+	/* There is no LVTS4_1 in MT6785 compared with MT6779 */
+	/* LVTS9_0 always has no temperature data because
+	 * there is no HW route to it
+	 */
+	L_TS_LVTS9_0,
+	L_TS_LVTS_NUM
+};
+
+enum lvts_tc_enum {
+	LVTS_CONTROLLER0 = 0,	/* LVTSMONCTL0 */
+	LVTS_CONTROLLER1,	/* LVTSMONCTL0_1 */
+	LVTS_CONTROLLER2,	/* LVTSMONCTL0_2 */
+	LVTS_CONTROLLER3,	/* LVTSMONCTL0_3 */
+	LVTS_CONTROLLER_NUM
+};
+
+struct lvts_thermal_controller_speed {
+	unsigned int group_interval_delay;
+	unsigned int period_unit;
+	unsigned int filter_interval_delay;
+	unsigned int sensor_interval_delay;
+};
+
+struct lvts_thermal_controller {
+	enum lvts_sensor_enum ts[4]; /* sensor point 0 ~ 3 */
+	unsigned int ts_number;
+	int dominator_ts_idx; /* hw protection ref TS (index of the ts array) */
+	int tc_offset;
+	struct lvts_thermal_controller_speed tc_speed;
 };
 #endif
 
@@ -365,7 +328,6 @@ struct thermal_controller {
  */
 #ifdef CONFIG_OF
 extern u32 thermal_irq_number;
-extern u32 thermal_mcu_irq_number;
 extern void __iomem *thermal_base;
 extern void __iomem *auxadc_ts_base;
 extern void __iomem *infracfg_ao_base;
@@ -394,20 +356,14 @@ extern int tscpu_curr_gpu_temp;
 extern int temp_eUART;
 extern int temp_dUART;
 
-extern int tscpu_sspm_thermal_throttle;
 extern int tscpu_debug_log;
 extern const struct of_device_id mt_thermal_of_match[2];
-#if !defined(CFG_THERM_NO_AUXADC)
 extern struct thermal_controller tscpu_g_tc[THERMAL_CONTROLLER_NUM];
-#endif
 extern int tscpu_polling_trip_temp1;
 extern int tscpu_polling_trip_temp2;
 extern int tscpu_polling_factor1;
 extern int tscpu_polling_factor2;
 
-extern int lvts_hw_protect_enabled;
-
-#if !defined(CFG_THERM_NO_AUXADC)
 /*
  * temperature array to store both tsmcu and lvts (if exist) and export them
  */
@@ -419,7 +375,6 @@ extern int tscpu_ts_temp_r[TS_ENUM_MAX]; /* raw data */
  */
 extern int tscpu_ts_mcu_temp[L_TS_MCU_NUM];
 extern int tscpu_ts_mcu_temp_r[L_TS_MCU_NUM]; /* raw data */
-#endif
 
 #if CFG_THERM_LVTS
 /*
@@ -530,7 +485,6 @@ void tscpu_set_GPIO_toggle_for_monitor(void);
 #endif
 extern void tscpu_update_tempinfo(void);
 
-#if !defined(CFG_THERM_NO_AUXADC)
 /*In src/mtk_tc.c*/
 extern void tscpu_config_all_tc_hw_protect(int temperature, int temperature2);
 extern void tscpu_reset_thermal(void);
@@ -539,23 +493,20 @@ extern void tscpu_thermal_read_tc_temp(
 	int tc_num, enum tsmcu_sensor_enum type, int order);
 extern void tscpu_thermal_cal_prepare(void);
 extern void tscpu_thermal_cal_prepare_2(unsigned int ret);
-
+extern int tscpu_thermal_clock_on(void);
+extern int tscpu_thermal_clock_off(void);
 extern int tscpu_dump_cali_info(struct seq_file *m, void *v);
 extern int tscpu_thermal_fast_init(int tc_num);
 extern void thermal_get_AHB_clk_info(void);
 extern void print_risky_temps(char *prefix, int offset, int printLevel);
 extern void thermal_pause_all_periodoc_temp_sensing(void);
 extern void thermal_release_all_periodoc_temp_sensing(void);
-
+extern int (*max_temperature_in_bank[THERMAL_BANK_NUM])(void);
 extern void thermal_disable_all_periodoc_temp_sensing(void);
 extern void read_all_tc_tsmcu_temperature(void);
 extern irqreturn_t tscpu_thermal_all_tc_interrupt_handler(
 int irq, void *dev_id);
-#endif
-extern int (*max_temperature_in_bank[THERMAL_BANK_NUM])(void);
-extern int tscpu_thermal_clock_on(void);
-extern int tscpu_thermal_clock_off(void);
-extern void lvts_tscpu_reset_thermal(void);
+
 /*
  * Support LVTS
  */
@@ -571,19 +522,12 @@ extern int (*lvts_max_temperature_in_bank[THERMAL_BANK_NUM])(void);
 extern void lvts_thermal_lvts_device_init(void);
 extern void lvts_read_temperature(void);
 //extern void lvts_read_temperature(int temp0, int temp1);
-#if DUMP_LVTS_REGISTER_FOR_ZERO_RAW_ISSUE
-extern void clear_lvts_register_value_array(void);
-extern void dump_lvts_error_info(void);
-#endif
 extern void lvts_thermal_cal_prepare(void);
 extern void lvts_device_identification(void);
 extern void lvts_reset_device_and_stop_clk(void);
 extern void  lvts_read_device_id_rev(void);
 extern void lvts_Device_Enable_Init_all_Devices(void);
 extern void lvts_device_read_count_RC_N(void);
-#if defined(CFG_THERM_USE_BOOTUP_COUNT_RC)
-extern void lvts_device_read_count_RC_N_resume(void);
-#endif
 extern void lvts_device_enable_auto_rck(void);
 extern void lvts_efuse_setting(void);
 extern void lvts_tscpu_thermal_initial_all_tc(void);
@@ -597,10 +541,7 @@ extern irqreturn_t lvts_tscpu_thermal_all_tc_interrupt_handler(
 int irq, void *dev_id);
 extern int lvts_tscpu_dump_cali_info(struct seq_file *m, void *v);
 extern void lvts_sodi3_release_thermal_controller(void);
-#ifdef CONFIG_LVTS_DYNAMIC_ENABLE_REBOOT
-extern void lvts_enable_all_hw_protect(void);
-extern void lvts_disable_all_hw_protect(void);
-#endif
+extern void lvts_tscpu_reset_thermal(void);
 #endif
 
 /*
@@ -629,9 +570,6 @@ extern void dump_lvts_register_value(void);
 #endif
 #if LVTS_VALID_DATA_TIME_PROFILING
 extern void lvts_dump_time_profiling_result(struct seq_file *m);
-#endif
-#if CFG_THERMAL_KERNEL_IGNORE_HOT_SENSOR
-extern int tscpu_check_cpu_segment(void);
 #endif
 /*=============================================================
  *LOG
@@ -744,9 +682,6 @@ extern int tscpu_check_cpu_segment(void);
 #define INFRA_GLOBALCON_RST_0_SET (INFRACFG_AO_BASE_2 + 0x120)
 #define INFRA_GLOBALCON_RST_0_CLR (INFRACFG_AO_BASE_2 + 0x124)
 #define INFRA_GLOBALCON_RST_0_STA (INFRACFG_AO_BASE_2 + 0x128)
-
-#define INFRA_GLOBALCON_RST_4_SET (INFRACFG_AO_BASE_2 + 0x730)
-#define INFRA_GLOBALCON_RST_4_CLR (INFRACFG_AO_BASE_2 + 0x734)
 /*******************************************************************************
  * APMixedSys Configuration Register Definition
  *****************************************************************************

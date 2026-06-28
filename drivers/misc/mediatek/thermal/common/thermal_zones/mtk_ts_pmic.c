@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -51,7 +52,7 @@ static int polling_trip_temp2 = 20000;
 static int polling_factor1 = 5000;
 static int polling_factor2 = 10000;
 
-static unsigned int interval = 1;	/* seconds, 0 : no auto polling */
+static unsigned int interval;	/* seconds, 0 : no auto polling */
 static unsigned int trip_temp[10] = { 1360000, 110000, 100000, 90000, 80000,
 					70000, 65000, 60000, 55000, 50000 };
 

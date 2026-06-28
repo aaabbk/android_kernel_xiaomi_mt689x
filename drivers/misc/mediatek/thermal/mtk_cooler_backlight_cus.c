@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -55,20 +56,14 @@ static int mtk_cl_backlight_set_cur_state
 (struct thermal_cooling_device *cdev, unsigned long state)
 {
 	int enable = (state >= MAX_BACKLIGHT_BRIGHTNESS) ? 0 : 1;
-#if !defined(CONFIG_LEDS_MTK_DISP) && \
-		!defined(CONFIG_LEDS_MTK_PWM)
-        int temp;
 
-#endif
 	state = (state > MAX_BACKLIGHT_BRIGHTNESS)
 		? MAX_BACKLIGHT_BRIGHTNESS : state;
 
-#if defined(CONFIG_LEDS_MTK_DISP) || \
-		defined(CONFIG_LEDS_MTK_PWM)
+#if defined(CONFIG_LEDS_MTK_DISP) || defined(CONFIG_LEDS_MTK_PWM)
 	setMaxBrightness("lcd-backlight", state, enable);
 #else
-	temp = state * 255 / 100;
-	setMaxbrightness(temp, enable);
+	setMaxbrightness(state, enable);
 #endif
 	g_backlight_level = state;
 	mtk_cooler_backlight_dprintk("%s: %d\n", __func__, g_backlight_level);
@@ -79,7 +74,7 @@ static int mtk_cl_backlight_set_cur_state
 static int mtk_cl_backlight_get_available
 (struct thermal_cooling_device *cdev, char *available)
 {
-	snprintf(available, 4, "%d\n", MAX_BACKLIGHT_BRIGHTNESS);
+	*available = MAX_BACKLIGHT_BRIGHTNESS;
 	return 0;
 }
 
@@ -154,4 +149,3 @@ static void __exit mtk_cooler_backlight_exit(void)
 }
 module_init(mtk_cooler_backlight_init);
 module_exit(mtk_cooler_backlight_exit);
-

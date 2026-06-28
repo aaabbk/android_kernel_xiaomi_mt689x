@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2018 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,8 +19,8 @@
 #define TZBATT_INITCFG_INTERVAL				(1)
 #define TZBATT_INITCFG_NUM_TRIPS			(1)
 
-#define TZBATT_INITCFG_TRIP_0_TEMP			(60000)
-#define TZBATT_INITCFG_TRIP_0_COOLER			"mtktsbattery-sysrst"
+#define TZBATT_INITCFG_TRIP_0_TEMP			(62000)
+#define TZBATT_INITCFG_TRIP_0_COOLER			"mtk-cl-kshutdown01"
 
 #define TZBATT_INITCFG_TRIP_1_TEMP			(48000)
 #define TZBATT_INITCFG_TRIP_1_COOLER			""

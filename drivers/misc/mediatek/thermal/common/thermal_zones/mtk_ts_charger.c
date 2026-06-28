@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -350,25 +351,25 @@ static struct thermal_zone_device_ops mtktscharger_dev_ops = {
 	.get_crit_temp = mtktscharger_get_crit_temp,
 };
 
+
 static struct thermal_zone_device_ops usb_conn_dev_ops = {
 	.get_temp = usb_conn_get_temp,
 };
 
 static int mtktscharger_register_thermal(void)
 {
-	mtktscharger_dprintk("%s\n", __func__);
 
 	/* trips : trip 0~2 */
 	thz_dev = mtk_thermal_zone_device_register("mtktscharger", num_trip,
 					NULL, /* name: mtktscharger ??? */
 					&mtktscharger_dev_ops, 0, 0, 0,
 					interval * 1000);
+
 	/* trips : trip 0~2 */
 	thz_conn_dev = mtk_thermal_zone_device_register("conn_therm", num_trip,
-				NULL, /* name: conn_therm ??? */
-				&usb_conn_dev_ops, 0, 0, 0,
-				interval * 1000);
-
+					NULL, /* name: conn_therm ??? */
+					&usb_conn_dev_ops, 0, 0, 0,
+					interval * 1000);
 	return 0;
 }
 
