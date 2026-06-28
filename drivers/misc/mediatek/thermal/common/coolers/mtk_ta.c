@@ -41,6 +41,7 @@
 #include <linux/reboot.h>
 #include <linux/vmalloc.h>
 #include <linux/uidgid.h>
+#define CLCTM_TARGET_TJ 84000
 #define MAX_LEN	128
 
 static kuid_t uid = KUIDT_INIT(0);
